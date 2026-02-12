@@ -29,7 +29,7 @@ func main() {
 	app := cli.NewApp()
 	app.Flags = cliapp.ProtectFlags(flags.Flags)
 	app.Version = opservice.FormatVersion(Version, GitCommit, GitDate, "")
-	app.Name = "op-celestia-indexer"
+	app.Name = "op-da-indexer"
 	app.Usage = "Celestia L2 Block Indexer Service"
 	app.Description = "Service for indexing L2 block locations on Celestia DA layer"
 	app.Action = cliapp.LifecycleCmd(indexer.Main(Version))

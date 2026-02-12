@@ -1,0 +1,62 @@
+name: Docker (op-da-indexer)
+
+env:
+  DOCKER_BUILDKIT: 1
+  REGISTRY: ghcr.io
+  REPO: ${{ github.repository_owner }}
+  IMAGE_NAME: op-da-indexer
+  PLATFORMS: linux/amd64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate clean ref name
+        id: clean_ref
+        run: |
+          CLEAN_REF="$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9.]/-/g')"
+          echo "name=${CLEAN_REF}" >> "$GITHUB_OUTPUT"
+
+      - name: Set build environment
+        run: |
+          {
+            echo "GIT_COMMIT=$(git rev-parse HEAD)"
+            echo "GIT_DATE=$(git show -s --format='%ct')"
+          } >> "$GITHUB_ENV"
+
+      - name: Build and push
+        run: |
+          IMAGE_BASE="${{ env.REGISTRY }}/${{ env.REPO }}/${{ env.IMAGE_NAME }}"
+          TAG_SHA="${IMAGE_BASE}:${{ github.sha }}"
+          TAG_REF="${IMAGE_BASE}:${{ steps.clean_ref.outputs.name }}"
+
+          docker buildx build \
+            -f Dockerfile.op-da-indexer \
+            --target op-da-indexer \
+            --platform "${{ env.PLATFORMS }}" \
+            --build-arg GIT_COMMIT="${{ env.GIT_COMMIT }}" \
+            --build-arg GIT_DATE="${{ env.GIT_DATE }}" \
+            -t "${TAG_SHA}" \
+            -t "${TAG_REF}" \
+            --push \
+            --progress plain \
+            .

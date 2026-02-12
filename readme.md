@@ -1,13 +1,12 @@
-# op-celestia-indexer
+# op-da-indexer
 
-The `op-celestia-indexer` is a service that indexes L2 block locations on both
-Celestia DA and Ethereum DA. It tracks where L2 blocks are
-stored by parsing batch transactions and maintaining a mapping between L2 block
-numbers and their corresponding DA locations.
+The `op-da-indexer` is a service that indexes L2 block locations on both Celestia DA and Ethereum DA.
+It tracks where L2 blocks are stored by parsing batch transactions and maintaining a mapping between L2 block numbers and their corresponding DA locations.
 
 ## Overview
 
 When using Celestia as the DA layer for Optimism, L2 batch data (frames) are posted to Celestia instead of being included as calldata in L1 transactions. L1 transactions contain:
+
 - OP Stack Alt-DA format: version byte (`0x01`) + commitment type + DA layer byte (`0x0c`) + 8 bytes height + 32 bytes commitment
 
 When using Ethereum DA, L2 batch data is included as calldata in L1 transactions with frame version byte `0x00`.
@@ -20,6 +19,7 @@ DA locations, and provides an RPC API to query L2 block locations.
 ## CLI Flags
 
 ### Required Flags
+
 - `--start-l1-block`: Starting L1 block number for indexing
 - `--batch-inbox-address`: Address of the batch inbox contract
 - `--l1-eth-rpc`: HTTP provider URL for L1 Ethereum (Execution node)
@@ -27,6 +27,7 @@ DA locations, and provides an RPC API to query L2 block locations.
 - `--op-node-rpc`: HTTP provider URL for op-node (for verification)
 
 ### Optional Flags
+
 - `--l1-beacon-rpc`: HTTP provider URL for L1 Ethereum (Consensus Node) - required for `4844 blobs` on L1.
 - `--poll-interval`: Polling interval for new blocks (default: 12s)
 - `--network-timeout`: Timeout for network requests (default: 10s)
@@ -34,6 +35,7 @@ DA locations, and provides an RPC API to query L2 block locations.
 - `--db-path`: Path to the SQLite database (default: in memory)
 
 ### Celestia DA Flags
+
 - `--da.rpc`: Celestia DA client RPC endpoint
 - `--da.auth_token`: Authentication token for Celestia client
 - `--da.namespace`: Namespace for Celestia DA operations
@@ -41,6 +43,7 @@ DA locations, and provides an RPC API to query L2 block locations.
 - `--da.gas_price`: Gas price for Celestia operations
 
 ### Standard op-service Flags
+
 - RPC server configuration (`--rpc.addr`, `--rpc.port`, `--rpc.enable-admin`)
 - Logging configuration (`--log.level`, `--log.format`)
 - Metrics configuration (`--metrics.enabled`, `--metrics.addr`, `--metrics.port`)
@@ -59,6 +62,7 @@ curl -X POST -H "Content-Type: application/json" -s \
 ```
 
 Response for Celestia DA:
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -79,6 +83,7 @@ Response for Celestia DA:
 ```
 
 Response for Ethereum DA (calldata):
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -98,6 +103,7 @@ Response for Ethereum DA (calldata):
 ```
 
 Response for Ethereum DA (EIP4844 blobs):
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -136,8 +142,8 @@ curl -X POST -H "Content-Type: application/json" -s \
 
 Start the indexer service:
 
-```bash
-./op-celestia-indexer \
+````bash
+./op-da-indexer \
   --rpc.port 9999 \
   --start-l1-block 1 \
   --batch-inbox-address 0x00e9bfcadbfb1f294e9a66bc0573878525f5015c \
@@ -156,9 +162,10 @@ Start the indexer service:
 Run the test suite:
 ```bash
 just test
-```
+````
 
 Run with verbose output:
+
 ```bash
 go test -v ./...
 ```
@@ -166,10 +173,13 @@ go test -v ./...
 ## Building
 
 Build the binary:
+
 ```bash
-just op-celestia-indexer
+just op-da-indexer
 ```
+
 Clean build artifacts:
+
 ```bash
 just clean
 ```
