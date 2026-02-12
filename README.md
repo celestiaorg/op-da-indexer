@@ -5,49 +5,14 @@ It tracks where L2 blocks are stored by parsing batch transactions and maintaini
 
 ## Overview
 
-When using Celestia as the DA layer for Optimism, L2 batch data (frames) are posted to Celestia instead of being included as calldata in L1 transactions. L1 transactions contain:
+When using Celestia as the DA layer for Optimism, L2 batch data (frames) are posted to Celestia instead of being included as calldata in L1 transactions.
+L1 transactions contain:
 
 - OP Stack Alt-DA format: version byte (`0x01`) + commitment type + DA layer byte (`0x0c`) + 8 bytes height + 32 bytes commitment
 
 When using Ethereum DA, L2 batch data is included as calldata in L1 transactions with frame version byte `0x00`.
 
-The indexer service monitors L1 batch inbox transactions, determines the DA type based on the version byte,
-fetches the corresponding frame data from Celestia or L1 calldata, parses frames to determine
-which L2 blocks they contain, maintains an index mapping L2 block numbers to
-DA locations, and provides an RPC API to query L2 block locations.
-
-## CLI Flags
-
-### Required Flags
-
-- `--start-l1-block`: Starting L1 block number for indexing
-- `--batch-inbox-address`: Address of the batch inbox contract
-- `--l1-eth-rpc`: HTTP provider URL for L1 Ethereum (Execution node)
-- `--l2-eth-rpc`: HTTP provider URL for L2 Ethereum
-- `--op-node-rpc`: HTTP provider URL for op-node (for verification)
-
-### Optional Flags
-
-- `--l1-beacon-rpc`: HTTP provider URL for L1 Ethereum (Consensus Node) - required for `4844 blobs` on L1.
-- `--poll-interval`: Polling interval for new blocks (default: 12s)
-- `--network-timeout`: Timeout for network requests (default: 10s)
-- `--verify-parent-check`: Enable parent check verification in span batches (default: true)
-- `--db-path`: Path to the SQLite database (default: in memory)
-
-### Celestia DA Flags
-
-- `--da.rpc`: Celestia DA client RPC endpoint
-- `--da.auth_token`: Authentication token for Celestia client
-- `--da.namespace`: Namespace for Celestia DA operations
-- `--da.fallback_mode`: Fallback mode (disabled/blobdata/calldata)
-- `--da.gas_price`: Gas price for Celestia operations
-
-### Standard op-service Flags
-
-- RPC server configuration (`--rpc.addr`, `--rpc.port`, `--rpc.enable-admin`)
-- Logging configuration (`--log.level`, `--log.format`)
-- Metrics configuration (`--metrics.enabled`, `--metrics.addr`, `--metrics.port`)
-- Profiling configuration (`--pprof.enabled`, `--pprof.addr`, `--pprof.port`)
+The indexer service monitors L1 batch inbox transactions, determines the DA type based on the version byte, fetches the corresponding frame data from Celestia or L1 calldata, parses frames to determine which L2 blocks they contain, maintains an index mapping L2 block numbers to DA locations, and provides an RPC API to query L2 block locations.
 
 ## API Usage
 
@@ -138,12 +103,18 @@ curl -X POST -H "Content-Type: application/json" -s \
   http://localhost:9999 | jq .
 ```
 
-## Example Usage
+## Operation
+
+Build the binary:
+
+```bash
+just build
+```
 
 Start the indexer service:
 
-````bash
-./op-da-indexer \
+```bash
+./bin/op-da-indexer \
   --rpc.port 9999 \
   --start-l1-block 1 \
   --batch-inbox-address 0x00e9bfcadbfb1f294e9a66bc0573878525f5015c \
@@ -156,30 +127,37 @@ Start the indexer service:
   --log.level debug \
   --da.rpc http://127.0.0.1:26658 \
   --da.namespace 00000000000000000000000000000000000000000000006465766e6574
-
-## Testing
-
-Run the test suite:
-```bash
-just test
-````
-
-Run with verbose output:
-
-```bash
-go test -v ./...
 ```
 
-## Building
+### CLI Flags
 
-Build the binary:
+#### Required Flags
 
-```bash
-just op-da-indexer
-```
+- `--start-l1-block`: Starting L1 block number for indexing
+- `--batch-inbox-address`: Address of the batch inbox contract
+- `--l1-eth-rpc`: HTTP provider URL for L1 Ethereum (Execution node)
+- `--l2-eth-rpc`: HTTP provider URL for L2 Ethereum
+- `--op-node-rpc`: HTTP provider URL for op-node (for verification)
 
-Clean build artifacts:
+#### Optional Flags
 
-```bash
-just clean
-```
+- `--l1-beacon-rpc`: HTTP provider URL for L1 Ethereum (Consensus Node) - required for `4844 blobs` on L1.
+- `--poll-interval`: Polling interval for new blocks (default: 12s)
+- `--network-timeout`: Timeout for network requests (default: 10s)
+- `--verify-parent-check`: Enable parent check verification in span batches (default: true)
+- `--db-path`: Path to the SQLite database (default: in memory)
+
+#### Celestia DA Flags
+
+- `--da.rpc`: Celestia DA client RPC endpoint
+- `--da.auth_token`: Authentication token for Celestia client
+- `--da.namespace`: Namespace for Celestia DA operations
+- `--da.fallback_mode`: Fallback mode (disabled/blobdata/calldata)
+- `--da.gas_price`: Gas price for Celestia operations
+
+#### Standard op-service Flags
+
+- RPC server configuration (`--rpc.addr`, `--rpc.port`, `--rpc.enable-admin`)
+- Logging configuration (`--log.level`, `--log.format`)
+- Metrics configuration (`--metrics.enabled`, `--metrics.addr`, `--metrics.port`)
+- Profiling configuration (`--pprof.enabled`, `--pprof.addr`, `--pprof.port`)
