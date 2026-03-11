@@ -26,7 +26,8 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 
 FROM ${TARGET_BASE_IMAGE} AS op-da-indexer
 
-RUN apk add --no-cache ca-certificates && update-ca-certificates
+# use wget for healthchecks
+RUN apk add --no-cache ca-certificates wget && update-ca-certificates
 
 COPY --from=builder /app/bin/op-da-indexer /usr/local/bin/op-da-indexer
 
