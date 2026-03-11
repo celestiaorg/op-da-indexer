@@ -30,18 +30,12 @@ docker MODE="local":
     #!/usr/bin/env bash
     set -euo pipefail
 
-    if [ "{{ MODE }}" = "push" ]; then
-        OUTPUT="--push"
-    else
-        OUTPUT="--load"
-    fi
+    OUTPUT=$([ "{{ MODE }}" = "push" ] && echo "--push" || echo "--load")
 
     docker buildx build \
         -f Dockerfile \
         --target op-da-indexer \
         --platform {{ PLATFORM }} \
-        --build-arg GIT_COMMIT={{ GITCOMMIT }} \
-        --build-arg GIT_DATE={{ GITDATE }} \
         -t {{ IMAGE }}:{{ VERSION }} \
         -t {{ IMAGE }}:latest \
         ${OUTPUT} \
